@@ -1,4 +1,4 @@
-# Testing Guide for AI Impact Tracker
+# Testing Guide for "See How Your AI Usage Impacts the Environment"
 
 This guide walks you through testing the fixes for issues #13 and #14.
 
@@ -89,7 +89,7 @@ VERIFICATION: Issue #14 - Code Deduplication
    - Click "Select" to load the extension
 
 4. **Verify Loading**
-   - ✅ Extension card appears with "AI Impact Tracker" title
+   - ✅ Extension card appears with extension title
    - ✅ Version shows "1.8"
    - ✅ No red error messages appear
    - ✅ Extension icon shows in Chrome toolbar
@@ -258,7 +258,7 @@ This verifies the shared module loaded correctly in both contexts.
    - Go to ChatGPT tab
    - Open DevTools (F12)
    - Click "Sources" tab
-   - Look for: `chatgpt.com` → `Content scripts` → `AI Impact Tracker`
+   - Look for: `chatgpt.com` → `Content scripts` → Extension name
    - ✅ Should see: `energy-calculator.js`
    - ✅ Should see: `content.js`
 
@@ -329,7 +329,7 @@ Make sure we didn't break anything existing.
 
 2. **Check Memory Usage**
    - Open Chrome Task Manager: `Shift+Esc` (Windows) or from Menu
-   - Find "Extension: AI Impact Tracker"
+   - Find extension entry
    - ✅ Memory should be reasonable (<50 MB)
    - ✅ CPU should be low when idle
 

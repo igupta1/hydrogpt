@@ -1,13 +1,82 @@
 # Changelog
 
-All notable changes to the AI Impact Tracker extension will be documented in this file.
+All notable changes to the "See How Your AI Usage Impacts the Environment" extension will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [2.3] - 2025-11-24
 
+### Added
+- **Added "Methodology" tab**
+  - New dedicated tab explaining the Community Estimates methodology
+  - Displays energy consumption formulas and calculations
+  - Includes model assumptions (GPT-5: 300B parameters, MoE architecture)
+  - Links to EcoLogits methodology and data sources
+  - Beautiful formatting matching the dark theme
+  - Professional presentation of technical information
+
+- **Added energy comparison placeholders**
+  - 4 placeholder comparison items under "Today" tab
+  - 4 placeholder comparison items under "Lifetime" tab
+  - Ready for team to add custom comparisons (e.g., "X Wh = Y toasters")
+  - Dashed border design matching UI theme
+  - Clearly labeled for team implementation
+
 ### Removed
+- **Removed Global Scale Perspective section**
+  - Removed global scale comparison from Lifetime tab
+  - Removed `global-scale.js` dependency
+  - Simplified dashboard focus on direct energy metrics
+
+- **Removed branding elements**
+  - Removed "View methodology" button from header
+  - Removed disclaimer text from footer
+  - Removed GitHub contributions text from Methodology tab
+
+### Changed
+- **Replaced extension icons with placeholders**
+  - All icon files (16x16, 32x32, 48x48, 128x128) now use simple gray placeholders
+  - Dashed border design matching the UI theme
+  - Ready for designer to create final branded icons
+
+- **Updated all "AI Impact Tracker" references**
+  - Changed to "See How Your AI Usage Impacts the Environment" throughout codebase
+  - Updated in comments, documentation, and all user-facing text
+  - Consistent branding across all files
+- **Rebranded extension**
+  - Rebranded extension with new name "See How Your AI Usage Impacts the Environment"
+  - Updated all UI text and documentation
+
+- **Redesigned with ChatGPT dark mode theme**
+  - Applied dark color scheme matching ChatGPT's interface
+  - Background: `#212121`, Cards: `#2f2f2f`, Text: `#ececf1`
+  - Improved visual consistency for ChatGPT users
+  - Better readability with dark theme
+
+- **Added logo/icon placeholders**
+  - Replaced all icons and logos with clearly marked placeholders
+  - Dashed border boxes with "LOGO" and "ICON" labels
+  - Ready for designer to add final branding assets
+
+- **Added "Learn More" tab**
+  - New educational section in dashboard
+  - Video placeholder with clear instructions for embedding
+  - Space for educational content about AI's environmental impact
+
+- **Replaced popup with full-page dashboard**
+  - Created new `dashboard.html` and `dashboard.js` for a dedicated web page
+  - Clicking the notification on ChatGPT now opens a new tab with the dashboard
+  - Clicking the extension icon opens the dashboard
+  - Better user experience with more space for information display
+  - All statistics and information from the popup are now on the dashboard page
+
+### Removed
+- **Removed popup functionality**
+  - Removed `popup.html` functionality (file kept for reference but not used)
+  - Removed `popup.js` logic related to popup display (dashboard.js now handles this)
+  - Popup no longer opens when clicking extension icon or notification
+
 - **Removed Sam Altman's estimation method**
   - Extension now uses only community estimates based on EcoLogits methodology
   - Removed estimation method selector dropdown from UI
@@ -20,7 +89,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Removed elevator travel comparison
   - Focus is now on direct energy (Wh) measurements and global scale comparison
 
-### Changed
+### Updated
+- Updated `background.js` to handle opening dashboard in new tab
+- Updated `content.js` to open dashboard instead of popup
+- Updated `manifest.json` to remove popup reference
 - Simplified UI with focus on energy consumption (Wh) and global scale perspective
 - Updated methodology.md to reflect single estimation method
 - Updated README.md to describe new features

@@ -1,9 +1,9 @@
 /**
- * AI Impact Tracker - Content Script
- * =====================================
+ * See How Your AI Usage Impacts the Environment - Content Script
+ * ================================================================
  * This script captures conversation data from the ChatGPT web interface,
  * extracts message content, calculates token usage, energy consumption,
- * and CO2 emissions. It persists data to Chrome storage for the popup UI.
+ * and CO2 emissions. It persists data to Chrome storage for the dashboard UI.
  *
  * Note: energy-calculator.js is loaded before this file via manifest.json
  * The calculateEnergyAndEmissions() function is available in global scope.
@@ -502,13 +502,13 @@ function createUsageNotification() {
     </div>
   `;
 
-  // Add click event listener to open extension popup
+  // Add click event listener to open dashboard page
   notification.addEventListener('click', () => {
-    // Try to open the extension popup programmatically
     try {
-      chrome.runtime.sendMessage({ action: "openPopup" });
+      // Open the dashboard in a new tab
+      chrome.runtime.sendMessage({ action: "openDashboard" });
     } catch (e) {
-      console.error("Failed to open popup:", e);
+      console.error("Failed to open dashboard:", e);
     }
   });
   
@@ -564,7 +564,7 @@ function createUsageNotification() {
     });
   }
 
-  console.log("AI Impact notification added to page");
+  console.log("AI environmental impact notification added to page");
 
   // Initial update
   updateUsageNotification();

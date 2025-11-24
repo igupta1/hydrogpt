@@ -1,6 +1,6 @@
 /**
- * AI Impact Tracker - Global Scale Comparison Module
- * ===================================================
+ * See How Your AI Usage Impacts the Environment - Global Scale Comparison Module
+ * ===============================================================================
  *
  * This module provides functionality to contextualize individual AI usage
  * at a global scale by comparing what would happen if everyone in the world

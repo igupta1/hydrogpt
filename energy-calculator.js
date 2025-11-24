@@ -1,9 +1,9 @@
 /**
- * AI Impact Tracker - Shared Energy Calculator Module
- * ====================================================
+ * See How Your AI Usage Impacts the Environment - Shared Energy Calculator Module
+ * ================================================================================
  *
  * This module provides shared energy calculation functionality for both
- * content.js (content script) and popup.js (popup UI).
+ * content.js (content script) and dashboard.js (dashboard UI).
  *
  * This eliminates code duplication and ensures consistent calculations
  * across all contexts.
@@ -11,9 +11,9 @@
  * Implements the EcoLogits methodology from:
  * https://ecologits.ai/0.2/methodology/llm_inference/
  *
- * Note: This file is loaded in both content script and popup contexts.
+ * Note: This file is loaded in both content script and dashboard contexts.
  * - For content scripts: Loaded via manifest.json before content.js
- * - For popup: Loaded as ES6 module via popup.html
+ * - For dashboard: Loaded via dashboard.html
  *
  * @module energy-calculator
  */

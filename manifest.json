@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
-    "name": "AI Impact Tracker",
-    "version": "2.2",
-    "description": "Track the environmental impact of your AI usage with relatable equivalents",
+    "name": "See How Your AI Usage Impacts the Environment",
+    "version": "2.3",
+    "description": "Track the environmental impact of your AI usage with real-time energy consumption metrics",
     "permissions": ["storage"],
     "host_permissions": ["https://chatgpt.com/*", "https://chat.openai.com/*"],
     "background": {
@@ -22,7 +22,6 @@
       }
     ],
     "action": {
-      "default_popup": "popup.html",
       "default_icon": {
         "16": "icons/icon16.png",
         "32": "icons/icon32.png",

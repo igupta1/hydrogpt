@@ -1,11 +1,11 @@
 /**
- * AI Impact Tracker - Background Script
- * =========================================
+ * See How Your AI Usage Impacts the Environment - Background Script
+ * ==================================================================
  * This script handles extension initialization and background tasks.
  */
 
 chrome.runtime.onInstalled.addListener((details) => {
-  console.log("AI Impact Tracker installation type:", details.reason);
+  console.log("See How Your AI Usage Impacts the Environment installation type:", details.reason);
   
   // Different handling for install vs. update
   if (details.reason === 'install') {
@@ -60,13 +60,18 @@ chrome.runtime.onInstalled.addListener((details) => {
   }
 });
 
-// Handle message from content script to open popup
+// Handle message from content script to open dashboard
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.action === "openPopup") {
-    // Chrome doesn't allow programmatically opening the popup,
-    // but we can focus the extension's browser action
-    chrome.action.openPopup();
-    console.log("Attempted to open popup");
+  if (message.action === "openDashboard") {
+    // Open the dashboard page in a new tab
+    chrome.tabs.create({ url: chrome.runtime.getURL('dashboard.html') });
+    console.log("Opened dashboard in new tab");
     return true;
   }
+});
+
+// Handle extension icon click to open dashboard
+chrome.action.onClicked.addListener(() => {
+  chrome.tabs.create({ url: chrome.runtime.getURL('dashboard.html') });
+  console.log("Extension icon clicked - opened dashboard");
 });

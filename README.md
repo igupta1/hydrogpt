@@ -1,6 +1,6 @@
 <div align="center">
 
-# AI impact tracker 🌱
+# See How Your AI Usage Impacts the Environment 🌱
 
 A browser extension (for now only Chrome) that estimates the environmental impact of your AI interactions.
 
@@ -33,9 +33,13 @@ This extension tracks messages the user sends to ChatGPT, tries to catch the num
 - First version will soon be published on the Chrome Web Store
 - Open to contributions
 
-Here is the roadmap: [AI Impact Tracker Roadmap](https://github.com/users/simonaszilinskas/projects/1)
+Here is the roadmap: [Project Roadmap](https://github.com/users/simonaszilinskas/projects/1)
 
 Feel free to implement some of the ideas or to suggest new ones - contributions are welcome! Feel free to submit issues, feature requests, or pull requests.
+
+## Branding Note
+
+Logo and icon placeholders are included in the dashboard. A designer will create the final branding assets.
 
 ## Contact
 The project is mainly being vibe coded by:

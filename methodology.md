@@ -1,6 +1,6 @@
-# AI Impact Tracker methodology
+# See How Your AI Usage Impacts the Environment - Methodology
 
-This page tries to outline the methodology used by the AI Impact Tracker extension to calculate energy consumption of LLM interactions, along with real-world equivalents for better context.
+This page tries to outline the methodology used by the "See How Your AI Usage Impacts the Environment" extension to calculate energy consumption of LLM interactions.
 
 ## Features
 
@@ -12,7 +12,7 @@ This page tries to outline the methodology used by the AI Impact Tracker extensi
 
 ## How energy consumption of LLMs is calculated
 
-The AI Impact Tracker uses community estimates based on academic research and the EcoLogits methodology, modeling the model behind ChatGPT as a large Mixture of Experts (MoE).
+The extension uses community estimates based on academic research and the EcoLogits methodology, modeling the model behind ChatGPT as a large Mixture of Experts (MoE).
 
 ### Core methodology
 
@@ -120,7 +120,7 @@ The global scale perspective helps answer the question: *"What if everyone used 
 
 # Conclusion
 
-The AI Impact Tracker provides research-based estimates of LLM energy consumption using community estimates and the EcoLogits methodology. The global scale comparison feature helps contextualize individual usage by showing what would happen if everyone consumed the same amount of energy.
+The extension provides research-based estimates of LLM energy consumption using community estimates and the EcoLogits methodology.
 
 **Important Note**: These are estimates based on available information and academic research. Exact energy measurements would require direct data from model providers, which is currently not publicly available. The need for more transparency from AI providers regarding their actual energy usage remains critical.
 

@@ -1,6 +1,6 @@
 /**
- * AI Impact Tracker - Popup UI Script
- * =======================================
+ * See How Your AI Usage Impacts the Environment - Popup UI Script
+ * ================================================================
  * This script handles the popup UI functionality including loading,
  * displaying usage logs and environmental metrics.
  *
