@@ -32,36 +32,6 @@ function checkExtensionContext() {
 }
 
 /**
- * Gets the current estimation method from storage
- * @returns {Promise<string>} 'community' or 'altman'
- */
-function getEstimationMethod() {
-  return new Promise((resolve) => {
-    if (!checkExtensionContext()) {
-      console.log('Content script: No extension context, defaulting to community');
-      resolve('community'); // Default to community estimates
-      return;
-    }
-    
-    try {
-      chrome.storage.local.get(['estimationMethod'], function(result) {
-        if (chrome.runtime.lastError) {
-          console.error('Content script: Error getting estimation method:', chrome.runtime.lastError);
-          resolve('community');
-        } else {
-          const method = result.estimationMethod || 'community';
-          console.log('Content script: Loaded estimation method from storage:', method);
-          resolve(method);
-        }
-      });
-    } catch (error) {
-      console.error('Content script: Error accessing storage for estimation method:', error);
-      resolve('community');
-    }
-  });
-}
-
-/**
  * Saves data to Chrome's local storage
  * Handles extension context invalidation gracefully
  * @param {Object} data - Data object to store
@@ -112,9 +82,8 @@ async function saveLog(userMessage, assistantResponse) {
   const userTokenCount = Math.ceil(userMessage.length / 4);
   const assistantTokenCount = Math.ceil(assistantResponse.length / 4);
   
-  // Get the current estimation method and calculate environmental impact
-  const estimationMethod = await getEstimationMethod();
-  const energyData = calculateEnergyAndEmissions(assistantTokenCount, estimationMethod);
+  // Calculate environmental impact using community estimates
+  const energyData = calculateEnergyAndEmissions(assistantTokenCount);
   const energyUsage = energyData.totalEnergy;
   const co2Emissions = energyData.co2Emissions;
   
@@ -775,37 +744,22 @@ function reloadLogsFromStorage() {
 if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
   try {
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.action === "updateNotification") {
-    if (message.enabled) {
-      // Show the notification if it doesn't exist
-      if (!document.getElementById('ai-impact-notification')) {
-        createUsageNotification();
+      if (message.action === "updateNotification") {
+        if (message.enabled) {
+          // Show the notification if it doesn't exist
+          if (!document.getElementById('ai-impact-notification')) {
+            createUsageNotification();
+          }
+        } else {
+          // Hide the notification if it exists
+          const notification = document.getElementById('ai-impact-notification');
+          if (notification) {
+            notification.parentNode.removeChild(notification);
+          }
+        }
+        return true;
       }
-    } else {
-      // Hide the notification if it exists
-      const notification = document.getElementById('ai-impact-notification');
-      if (notification) {
-        notification.parentNode.removeChild(notification);
-      }
-    }
-    return true;
-  } else if (message.type === 'estimationMethodChanged') {
-    // Acknowledge the change and reload logs from storage after a brief delay
-    console.log('Content script: Estimation method changed to:', message.method);
-    
-    // Wait a moment to ensure popup has finished saving, then reload
-    setTimeout(() => {
-      reloadLogsFromStorage().then(() => {
-        // Update the notification with the new calculations
-        updateUsageNotification();
-        console.log('Content script: Notification updated with new estimation method');
-      });
-    }, 100);
-    
-    sendResponse({ success: true });
-    return true;
-  }
-});
+    });
   } catch (e) {
     console.warn('Failed to add message listener:', e);
   }
@@ -813,18 +767,16 @@ if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage)
 
 
 /**
- * Calculates energy usage and CO2 emissions based on selected methodology
+ * Calculates energy usage and CO2 emissions
  *
  * NOTE: This function is now imported from energy-calculator.js (shared module)
  * The implementation is in energy-calculator.js to eliminate code duplication
  * See: energy-calculator.js for the complete implementation
  *
- * This implements either:
- * 1. EcoLogits methodology (community estimates) from https://ecologits.ai/0.2/methodology/llm_inference/
- * 2. Sam Altman's estimation (0.34 Wh per query, scaled by tokens)
+ * This implements the EcoLogits methodology (community estimates) from:
+ * https://ecologits.ai/0.2/methodology/llm_inference/
  *
  * @param {number} outputTokens - Number of tokens in the assistant's response
- * @param {string} method - 'community' or 'altman'
  * @returns {Object} Energy usage and emissions data
  *
  * The function is imported at the top of this file and used directly.

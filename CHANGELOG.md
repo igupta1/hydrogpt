@@ -5,6 +5,26 @@ All notable changes to the AI Impact Tracker extension will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3] - 2025-11-24
+
+### Removed
+- **Removed Sam Altman's estimation method**
+  - Extension now uses only community estimates based on EcoLogits methodology
+  - Removed estimation method selector dropdown from UI
+  - Simplified codebase by removing dual-method logic
+  
+- **Removed environmental equivalents**
+  - Removed YouTube streaming time comparison
+  - Removed 60W light bulb runtime comparison
+  - Removed phone charges comparison
+  - Removed elevator travel comparison
+  - Focus is now on direct energy (Wh) measurements and global scale comparison
+
+### Changed
+- Simplified UI with focus on energy consumption (Wh) and global scale perspective
+- Updated methodology.md to reflect single estimation method
+- Updated README.md to describe new features
+
 ## [2.2] - 2025-10-17
 
 ### Changed

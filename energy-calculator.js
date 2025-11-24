@@ -60,38 +60,22 @@ const GPT5_PARAMS = {
 };
 
 /**
- * Sam Altman's estimation parameters
- * Source: https://blog.samaltman.com/the-gentle-singularity
- */
-const ALTMAN_PARAMS = {
-  ENERGY_PER_QUERY: 0.34,     // Wh per query (as stated by Sam Altman)
-  AVG_TOKENS_PER_QUERY: 781   // Average output tokens per query (from compar:IA dataset)
-};
-
-/**
  * Calculates energy usage and CO2 emissions for LLM inference
  *
- * Supports two estimation methods:
- * 1. 'community' - EcoLogits methodology (academic research)
- * 2. 'altman' - Sam Altman's estimate (industry statement)
+ * Uses the EcoLogits methodology (academic research)
  *
  * @param {number} outputTokens - Number of tokens in the assistant's response
- * @param {string} [method='community'] - Estimation method: 'community' or 'altman'
+ * @param {string} [method='community'] - Estimation method (kept for backward compatibility, defaults to 'community')
  * @returns {Object} Energy and emissions data
  * @returns {number} returns.totalEnergy - Total energy consumption (Wh)
  * @returns {number} returns.co2Emissions - CO2 emissions (grams)
- * @returns {number} [returns.numGPUs] - Number of GPUs required (community method only)
- * @returns {Object} [returns.modelDetails] - Additional model details
+ * @returns {number} returns.numGPUs - Number of GPUs required
+ * @returns {Object} returns.modelDetails - Additional model details
  *
  * @example
- * // Calculate energy for 100 tokens using community method
- * const result = calculateEnergyAndEmissions(100, 'community');
+ * // Calculate energy for 100 tokens
+ * const result = calculateEnergyAndEmissions(100);
  * console.log(result.totalEnergy); // ~4.15 Wh
- *
- * @example
- * // Calculate energy using Altman's estimate
- * const result = calculateEnergyAndEmissions(100, 'altman');
- * console.log(result.totalEnergy); // ~0.04 Wh
  */
 function calculateEnergyAndEmissions(outputTokens, method = 'community') {
   const {
@@ -107,103 +91,75 @@ function calculateEnergyAndEmissions(outputTokens, method = 'community') {
     WORLD_EMISSION_FACTOR
   } = ECOLOGITS_CONSTANTS;
 
-  if (method === 'altman') {
-    // Sam Altman's estimation: 0.34 Wh per query with 781 average output tokens
-    const altmanEnergyPerToken = ALTMAN_PARAMS.ENERGY_PER_QUERY / ALTMAN_PARAMS.AVG_TOKENS_PER_QUERY;
-    const totalEnergy = outputTokens * altmanEnergyPerToken;
+  // Community estimates using EcoLogits methodology
+  // GPT-5 is a Mixture of Experts (MoE) model with 300B total parameters
+  const { TOTAL_PARAMS, ACTIVE_PARAMS, ACTIVE_PARAMS_BILLIONS, ACTIVATION_RATIO } = GPT5_PARAMS;
 
-    // Ensure minimum energy value for visibility in UI
-    const minEnergy = 0.01;
-    const normalizedEnergy = Math.max(totalEnergy, minEnergy);
+  // Step 1: Calculate energy per token (per GPU)
+  // Uses ACTIVE parameters because energy is proportional to compute in MoE models
+  // Formula: E = α × P_active + β
+  const energyPerToken = ENERGY_ALPHA * ACTIVE_PARAMS_BILLIONS + ENERGY_BETA;
 
-    // Calculate CO2 emissions (grams)
-    const co2Emissions = normalizedEnergy * WORLD_EMISSION_FACTOR;
+  // Step 2: Calculate GPU memory requirements and number of GPUs needed
+  // Uses TOTAL parameters because memory stores the entire model
+  // Formula: M_model = 1.2 × P_total × Q / 8 (Q=quantization bits)
+  const memoryRequired = 1.2 * TOTAL_PARAMS * GPU_BITS / 8; // in bytes
+  const numGPUs = Math.ceil(memoryRequired / (GPU_MEMORY * 1e9)); // = 3 GPUs for GPT-5
 
-    return {
-      numGPUs: 1, // Simplified for Altman estimate
-      totalEnergy: normalizedEnergy,
-      co2Emissions,
-      modelDetails: {
-        method: 'altman',
-        energyPerToken: altmanEnergyPerToken
-      }
-    };
-  } else {
-    // Community estimates using EcoLogits methodology
-    // GPT-5 is a Mixture of Experts (MoE) model with 300B total parameters
-    const { TOTAL_PARAMS, ACTIVE_PARAMS, ACTIVE_PARAMS_BILLIONS, ACTIVATION_RATIO } = GPT5_PARAMS;
+  // Step 3: Calculate inference latency
+  // Uses ACTIVE parameters because latency depends on compute
+  // Formula: ΔT = #tokens × (A × P_active + B)
+  const latencyPerToken = LATENCY_ALPHA * ACTIVE_PARAMS_BILLIONS + LATENCY_BETA;
+  const totalLatency = outputTokens * latencyPerToken; // in seconds
 
-    // Step 1: Calculate energy per token (per GPU)
-    // Uses ACTIVE parameters because energy is proportional to compute in MoE models
-    // Formula: E = α × P_active + β
-    const energyPerToken = ENERGY_ALPHA * ACTIVE_PARAMS_BILLIONS + ENERGY_BETA;
+  // Step 4: Calculate GPU energy consumption
+  // Multiply by numGPUs because all GPUs are active during inference
+  const gpuEnergy = outputTokens * energyPerToken * numGPUs;
 
-    // Step 2: Calculate GPU memory requirements and number of GPUs needed
-    // Uses TOTAL parameters because memory stores the entire model
-    // Formula: M_model = 1.2 × P_total × Q / 8 (Q=quantization bits)
-    const memoryRequired = 1.2 * TOTAL_PARAMS * GPU_BITS / 8; // in bytes
-    const numGPUs = Math.ceil(memoryRequired / (GPU_MEMORY * 1e9)); // = 3 GPUs for GPT-5
+  // Step 5: Calculate server energy excluding GPUs
+  // Server components (CPU, memory, networking) also consume power
+  // Formula: E_server = ΔT × P_server × (numGPUs / installedGPUs) / 3600 × 1000
+  // Division by 3600 converts seconds to hours, multiplication by 1000 converts kW to W
+  const serverEnergyWithoutGPU = totalLatency * SERVER_POWER_WITHOUT_GPU * numGPUs / INSTALLED_GPUS / 3600 * 1000;
 
-    // Step 3: Calculate inference latency
-    // Uses ACTIVE parameters because latency depends on compute
-    // Formula: ΔT = #tokens × (A × P_active + B)
-    const latencyPerToken = LATENCY_ALPHA * ACTIVE_PARAMS_BILLIONS + LATENCY_BETA;
-    const totalLatency = outputTokens * latencyPerToken; // in seconds
+  // Step 6: Total server energy (GPU + non-GPU components)
+  const serverEnergy = serverEnergyWithoutGPU + gpuEnergy;
 
-    // Step 4: Calculate GPU energy consumption
-    // Multiply by numGPUs because all GPUs are active during inference
-    const gpuEnergy = outputTokens * energyPerToken * numGPUs;
+  // Step 7: Apply Power Usage Effectiveness (PUE)
+  // PUE accounts for data center overhead (cooling, power distribution, etc.)
+  const totalEnergy = PUE * serverEnergy;
 
-    // Step 5: Calculate server energy excluding GPUs
-    // Server components (CPU, memory, networking) also consume power
-    // Formula: E_server = ΔT × P_server × (numGPUs / installedGPUs) / 3600 × 1000
-    // Division by 3600 converts seconds to hours, multiplication by 1000 converts kW to W
-    const serverEnergyWithoutGPU = totalLatency * SERVER_POWER_WITHOUT_GPU * numGPUs / INSTALLED_GPUS / 3600 * 1000;
+  // Ensure minimum energy value for visibility in UI
+  const minEnergy = 0.01;
+  const normalizedEnergy = Math.max(totalEnergy, minEnergy);
 
-    // Step 6: Total server energy (GPU + non-GPU components)
-    const serverEnergy = serverEnergyWithoutGPU + gpuEnergy;
+  // Step 8: Calculate CO2 emissions
+  // Using global average emission factor
+  const co2Emissions = normalizedEnergy * WORLD_EMISSION_FACTOR;
 
-    // Step 7: Apply Power Usage Effectiveness (PUE)
-    // PUE accounts for data center overhead (cooling, power distribution, etc.)
-    const totalEnergy = PUE * serverEnergy;
-
-    // Ensure minimum energy value for visibility in UI
-    const minEnergy = 0.01;
-    const normalizedEnergy = Math.max(totalEnergy, minEnergy);
-
-    // Step 8: Calculate CO2 emissions
-    // Using global average emission factor
-    const co2Emissions = normalizedEnergy * WORLD_EMISSION_FACTOR;
-
-    return {
-      numGPUs,
-      totalEnergy: normalizedEnergy,
-      co2Emissions,
-      modelDetails: {
-        totalParams: TOTAL_PARAMS / 1e9,
-        activeParams: ACTIVE_PARAMS / 1e9,
-        activationRatio: ACTIVATION_RATIO,
-        method: 'community'
-      }
-    };
-  }
+  return {
+    numGPUs,
+    totalEnergy: normalizedEnergy,
+    co2Emissions,
+    modelDetails: {
+      totalParams: TOTAL_PARAMS / 1e9,
+      activeParams: ACTIVE_PARAMS / 1e9,
+      activationRatio: ACTIVATION_RATIO,
+      method: 'community'
+    }
+  };
 }
 
 /**
- * Helper function to get energy per token for a given method
+ * Helper function to get energy per token
  * Useful for displaying rate information in UI
  *
- * @param {string} [method='community'] - Estimation method
  * @returns {number} Energy per token in Wh/token
  */
-function getEnergyPerToken(method = 'community') {
-  if (method === 'altman') {
-    return ALTMAN_PARAMS.ENERGY_PER_QUERY / ALTMAN_PARAMS.AVG_TOKENS_PER_QUERY;
-  } else {
-    const { ENERGY_ALPHA, ENERGY_BETA } = ECOLOGITS_CONSTANTS;
-    const { ACTIVE_PARAMS_BILLIONS } = GPT5_PARAMS;
-    return ENERGY_ALPHA * ACTIVE_PARAMS_BILLIONS + ENERGY_BETA;
-  }
+function getEnergyPerToken() {
+  const { ENERGY_ALPHA, ENERGY_BETA } = ECOLOGITS_CONSTANTS;
+  const { ACTIVE_PARAMS_BILLIONS } = GPT5_PARAMS;
+  return ENERGY_ALPHA * ACTIVE_PARAMS_BILLIONS + ENERGY_BETA;
 }
 
 /**
@@ -224,7 +180,6 @@ if (typeof window !== 'undefined') {
   // Browser context - make available globally
   window.ECOLOGITS_CONSTANTS = ECOLOGITS_CONSTANTS;
   window.GPT5_PARAMS = GPT5_PARAMS;
-  window.ALTMAN_PARAMS = ALTMAN_PARAMS;
   window.calculateEnergyAndEmissions = calculateEnergyAndEmissions;
   window.getEnergyPerToken = getEnergyPerToken;
   window.getNumGPUs = getNumGPUs;
@@ -235,7 +190,6 @@ if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     ECOLOGITS_CONSTANTS,
     GPT5_PARAMS,
-    ALTMAN_PARAMS,
     calculateEnergyAndEmissions,
     getEnergyPerToken,
     getNumGPUs

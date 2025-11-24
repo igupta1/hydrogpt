@@ -20,12 +20,8 @@ A browser extension (for now only Chrome) that estimates the environmental impac
 ## Features
 
 - **Real-time Energy Tracking**: Monitors your ChatGPT conversations and calculates energy consumption
-- **Dual Estimation Methods**: Choose between community estimates (research-based) or Sam Altman's estimation
-- **Relatable Equivalents**: Understand your impact through everyday comparisons:
-  - 📺 YouTube streaming time
-  - 💡 60W light bulb runtime
-  - 📱 Phone charges
-  - 🛗 Elevator travel
+- **Research-Based Estimates**: Uses community estimates based on academic research and methodology
+- **Global Scale Comparison**: Understand your impact by comparing it to global energy consumption
 - **Daily & Lifetime Stats**: Track both your daily usage and cumulative impact
 - **Privacy-Focused**: No data collection, all tracking happens locally
 
